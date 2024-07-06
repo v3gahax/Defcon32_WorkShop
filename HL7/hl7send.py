@@ -1,45 +1,32 @@
 import socket
-from hl7apy.parser import parse_message
 
-# Define the HL7 message
-hl7_message = 
-"""MSH|^~\&|EPIC|EPICADT|iFW|SMSADT|199912271408|CHARRIS|ADT^A04|1817457|D|2.5|
-PID||0493575^^^2^ID 1|454721||DOE^JOHN^^^^|DOE^JOHN^^^^|19480203|M||B|254 
-MYSTREET 
-AVE^^MYTOWN^OH^44123^USA||(216)123-4567|||M|NON|400003403~1129086|
-NK1||ROE^MARIE^^^^|SPO||(216)123-4567||EC|||||||||||||||||||||||||||
-PV1||O|168 ~219~C~PMA^^^^^^^^^||||277^ALLEN 
-MYLASTNAME^BONNIE^^^^|||||||||| 
-||2688684|||||||||||||||||||||||||199912271408||||||002376853"""
+def send_hl7_message(host, port, hl7_message):
+    """
+    Send an HL7 message to a specified host and port.
+    """
+    # MLLP start and end block characters, and the carriage return.
+    start_block = '\x0b'
+    end_block = '\x1c'
+    carriage_return = '\r'
+    mllp_message = f"{start_block}{hl7_message}{end_block}{carriage_return}"
 
-# Parse the HL7 message to ensure it is correctly formatted
-parsed_message = parse_message(hl7_message)
+    # Create a socket and connect to the server
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.connect((host, port))
+        sock.sendall(mllp_message.encode('utf-8'))
+        print("HL7 message sent to the server.")
 
-# Convert the parsed message back to a string
-hl7_message_str = parsed_message.to_er7()
+if __name__ == "__main__":
+    # Server's IP address and port number
+    HOST = '127.0.0.1'  # or the server's IP address if different
+    PORT = 2575  # The port used by the server
 
-# Define the remote HL7 server details
-hl7_server_host = 'hl7.server.address'
-hl7_server_port = 12345
+    # Example HL7 message including the death indicator (PID-30)
+    hl7_message = "MSH|^~\\&|GHH_ADT||||20080115153000||ADT^A01^ADT_A01|0123456789|P|2.5||||AL|\r" \
+                  "PID|1||566-554-3423^^^GHH^MR||EVERYMAN^ADAM^A||19800101|M|||2222 HOME STREET^^ANN ARBOR^MI^^USA||555-555-2004~444-333-222|||||Y|\r" \
+                  "NK1|1|NUCLEAR^NELDA^W|SPO|2222 HOME STREET^^ANN ARBOR^MI^^USA|\r" \
+                  "PV1|1|I|GHH PATIENT WARD|U||||^SENDER^SAM^^MD|^PUMP^PATRICK^P|CAR||||2|A0|\r" \
+                  "IN1|1|HCID-GL^GLOBAL|HCID-23432|HC PAYOR, INC.|5555 INSURERS CIRCLE^^ANN ARBOR^MI^99999^USA||||||||||||||||||||||||||||||||||||||||||||444-33-3333"
 
-# Create a socket object
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    # Connect to the HL7 server
-    sock.connect((hl7_server_host, hl7_server_port))
-    
-    # Add start block and end block characters to the HL7 message
-    hl7_message_str_with_wrappers = f"\x0b{hl7_message_str}\x1c\x0d"
-
-    # Send the HL7 message
-    sock.sendall(hl7_message_str_with_wrappers.encode('utf-8'))
-    
-    # Receive the response from the server
-    response = sock.recv(4096).decode('utf-8')
-    print("Received response from the server:", response)
-    
-finally:
-    # Close the socket connection
-    sock.close()
-
+    # Send the message
+    send_hl7_message(HOST, PORT, hl7_message)
