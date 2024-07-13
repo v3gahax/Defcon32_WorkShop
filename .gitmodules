@@ -1,0 +1,3 @@
+[submodule "Dicom/Shielder-DICOM-poc"]
+	path = Dicom/Shielder-DICOM-poc
+	url = git@github.com:v3gahax/Shielder-DICOM-poc.git

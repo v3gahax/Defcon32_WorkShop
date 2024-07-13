@@ -5,13 +5,13 @@ def send_hl7_message(host, port, hl7_message):
     Send an HL7 message to a specified host and port.
     """
     # MLLP start and end block characters, and the carriage return.
-    start_block = '\x0b'
-    end_block = '\x1c'
-    carriage_return = '\r'
-    mllp_message = f"{start_block}{hl7_message}{end_block}{carriage_return}"
+    #start_block = '\x0b'
+    #end_block = '\x1c'
+    #carriage_return = '\r'
+    #mllp_message = f"{start_block}{hl7_message}{end_block}{carriage_return}"
 
-    print("Sending HL7 message:")
-    print(mllp_message)
+    #print("Sending HL7 message:")
+    #print(mllp_message)
 
     # Create a socket and connect to the server
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -35,4 +35,3 @@ if __name__ == "__main__":
 
     # Send the message
     send_hl7_message(HOST, PORT, hl7_message)
-
